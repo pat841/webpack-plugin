@@ -147,6 +147,7 @@ export class PreserveModuleNamePlugin {
           if (/^async[?!]/.test(realModule.rawRequest)) 
             id = "async!" + id;
           
+          id = id.replace(/\\/g, '/');
           if (module.buildMeta)  // meta can be null if the module contains errors
             module.buildMeta["aurelia-id"] = id;
           if (!this.isDll) {
