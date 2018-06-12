@@ -138,7 +138,8 @@ class PreserveModuleNamePlugin {
                     // Keep "async!" in front of code splits proxies, they are used by aurelia-loader
                     if (/^async[?!]/.test(realModule.rawRequest))
                         id = "async!" + id;
-                    if (module.buildMeta)
+                    id = id.replace(/\\/g, '/');
+                    if (module.buildMeta) // meta can be null if the module contains errors
                         module.buildMeta["aurelia-id"] = id;
                     if (!this.isDll) {
                         module[exports.preserveModuleName] = id;
@@ -298,9 +299,12 @@ function parseNodeModules() {
             if (!moduleEntry) {
                 moduleEntry = data.relative;
             }
+            // Shallow?
             else if (moduleEntry.split('/').length > data.relative.split('/').length) {
                 moduleEntry = data.relative;
             }
+            // This is an odd edge-case, both are as shallow as possible
+            // We attempt to use index over moduleKey
             else if (!(/\bindex\b/i.test(moduleEntry)) && /\bindex\b/i.test(data.relative)) {
                 moduleEntry = data.relative;
             }
