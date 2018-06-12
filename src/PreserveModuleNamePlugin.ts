@@ -56,6 +56,7 @@ export class PreserveModuleNamePlugin {
           }
 
           // Metadata?
+          moduleId = moduleId.replace(/\\/g, '/');
           if (module.meta) {
             module.meta['aurelia-id'] = moduleId;
           }

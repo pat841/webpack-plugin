@@ -49,6 +49,7 @@ class PreserveModuleNamePlugin {
                         moduleId = `async!${moduleId}`;
                     }
                     // Metadata?
+                    moduleId = moduleId.replace(/\\/g, '/');
                     if (module.meta) {
                         module.meta['aurelia-id'] = moduleId;
                     }
@@ -246,9 +247,12 @@ function parseNodeModules() {
             if (!moduleEntry) {
                 moduleEntry = data.relative;
             }
+            // Shallow?
             else if (moduleEntry.split('/').length > data.relative.split('/').length) {
                 moduleEntry = data.relative;
             }
+            // This is an odd edge-case, both are as shallow as possible
+            // We attempt to use index over moduleKey
             else if (!(/\bindex\b/i.test(moduleEntry)) && /\bindex\b/i.test(data.relative)) {
                 moduleEntry = data.relative;
             }

@@ -1,3 +1,4 @@
+"use strict";
 // This plugin tries to convert a request containing `/dist/xxx/` to the configured distribution if it exists.
 // For example new DistPlugin('native-modules') will turn 
 //    ./dist/commonjs/aurelia-framework.js 
@@ -9,7 +10,6 @@
 // if the alternate distribution does not exist.
 // The alias configuration above will fail the build if a third party lib also uses ./dist/commonjs
 // but does not include a ./dist/native-modules
-"use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class DistPlugin {
     constructor(dist) {

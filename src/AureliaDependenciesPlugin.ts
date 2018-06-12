@@ -44,7 +44,7 @@ class ParserPlugin {
     parser.plugin("evaluate Identifier imported var.moduleName", (expr: Webpack.MemberExpression) => {
       if (expr.property.name === "moduleName" &&
           expr.object.name === "PLATFORM" &&
-          expr.object.type === "Identifier") {
+          expr.object.type.toString() === "Identifier") {
         return new BasicEvaluatedExpression().setIdentifier("PLATFORM.moduleName").setRange(expr.range);
       }
       return undefined;
@@ -59,7 +59,7 @@ class ParserPlugin {
     parser.plugin("evaluate MemberExpression", (expr: Webpack.MemberExpression) => {
       if (expr.property.name === "moduleName" &&
          (expr.object.type === "MemberExpression" && expr.object.property.name === "PLATFORM" ||
-          expr.object.type === "Identifier" && expr.object.name === "PLATFORM")) {
+          expr.object.type.toString() === "Identifier" && expr.object.name === "PLATFORM")) {
         return new BasicEvaluatedExpression().setIdentifier("PLATFORM.moduleName").setRange(expr.range);
       }
       return undefined;
