@@ -199,22 +199,11 @@ function getNodeModuleData(module: Webpack.Module): NodeModule.Data | null {
     return null;
   }
 
-  function cleanWindowsPaths(paths: RegExpMatchArray | null) {
-    var out: string[] = [];
-    if (!paths) {
-      return out;
-    }
-    for (var i = 0; i < paths.length; i += 1) {
-      out[i] = paths[i].replace(':', '').split('\\').join('/');
-    }
-    return out;
-  }
-
   // Note that the negative lookahead (?!.*node_modules) ensures that we only match the last node_modules/ folder in the path,
   // in case the package was located in a sub-node_modules (which can occur in special circumstances).
   // We also need to take care of scoped modules. If the name starts with @ we must keep two parts,
   // so @corp/bar is the proper module name.
-  const modulePaths = cleanWindowsPaths(module.resource.match(/(.*\bnode_modules[\\/](?!.*\bnode_modules\b)((?:@[^\\/]+[\\/])?[^\\/]+))(.*)/i));
+  const modulePaths = module.resource.match(/(.*\bnode_modules[\\/](?!.*\bnode_modules\b)((?:@[^\\/]+[\\/])?[^\\/]+))(.*)/i);
   if (!modulePaths || modulePaths.length !== 4) {
     return null;
   }
