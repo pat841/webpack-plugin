@@ -48,7 +48,7 @@ class ParserPlugin {
     hooks.evaluateIdentifier.tap("imported var.moduleName", TAP_NAME, (expr: Webpack.MemberExpression) => {
       if (expr.property.name === "moduleName" &&
           expr.object.name === "PLATFORM" &&
-          expr.object.type.toString() === "Identifier") {
+          String(expr.object.type) === "Identifier") {
         return new BasicEvaluatedExpression().setIdentifier("PLATFORM.moduleName").setRange(expr.range);
       }
       return undefined;
@@ -62,8 +62,8 @@ class ParserPlugin {
     //    PLATFORM.moduleName("id");
     hooks.evaluate.tap("MemberExpression", TAP_NAME, expr => {
       if (expr.property.name === "moduleName" &&
-         (expr.object.type === "MemberExpression" && expr.object.property.name === "PLATFORM" ||
-          expr.object.type.toString() === "Identifier" && expr.object.name === "PLATFORM")) {
+         (String(expr.object.type) === "MemberExpression" && expr.object.property.name === "PLATFORM" ||
+          String(expr.object.type) === "Identifier" && expr.object.name === "PLATFORM")) {
         return new BasicEvaluatedExpression().setIdentifier("PLATFORM.moduleName").setRange(expr.range);
       }
       return undefined;
