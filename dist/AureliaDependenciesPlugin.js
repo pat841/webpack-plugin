@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const IncludeDependency_1 = require("./IncludeDependency");
 const BasicEvaluatedExpression = require("webpack/lib/BasicEvaluatedExpression");
+const PreserveModuleNamePlugin_1 = require("./PreserveModuleNamePlugin");
 const TAP_NAME = "Aurelia:Dependencies";
 class AureliaDependency extends IncludeDependency_1.IncludeDependency {
     constructor(request, range, options) {
@@ -11,7 +12,12 @@ class AureliaDependency extends IncludeDependency_1.IncludeDependency {
 }
 class Template {
     apply(dep, source) {
-        source.replace(dep.range[0], dep.range[1] - 1, "'" + dep.request.replace(/^async(?:\?[^!]*)?!/, "") + "'");
+        // Get the module id, fallback to using the module request
+        let moduleId = dep.request;
+        if (dep.module && typeof dep.module[PreserveModuleNamePlugin_1.preserveModuleName] === 'string') {
+            moduleId = dep.module[PreserveModuleNamePlugin_1.preserveModuleName];
+        }
+        source.replace(dep.range[0], dep.range[1] - 1, "'" + moduleId.replace(/^async(?:\?[^!]*)?!/, "") + "'");
     }
     ;
 }
@@ -35,7 +41,7 @@ class ParserPlugin {
         hooks.evaluateIdentifier.tap("imported var.moduleName", TAP_NAME, (expr) => {
             if (expr.property.name === "moduleName" &&
                 expr.object.name === "PLATFORM" &&
-                expr.object.type === "Identifier") {
+                String(expr.object.type) === "Identifier") {
                 return new BasicEvaluatedExpression().setIdentifier("PLATFORM.moduleName").setRange(expr.range);
             }
             return undefined;
@@ -49,7 +55,7 @@ class ParserPlugin {
         hooks.evaluate.tap("MemberExpression", TAP_NAME, expr => {
             if (expr.property.name === "moduleName" &&
                 (expr.object.type === "MemberExpression" && expr.object.property.name === "PLATFORM" ||
-                    expr.object.type === "Identifier" && expr.object.name === "PLATFORM")) {
+                    String(expr.object.type) === "Identifier" && expr.object.name === "PLATFORM")) {
                 return new BasicEvaluatedExpression().setIdentifier("PLATFORM.moduleName").setRange(expr.range);
             }
             return undefined;
