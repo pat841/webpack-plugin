@@ -4,12 +4,13 @@ import * as webpack from 'webpack';
 
 import { BasicEvaluatedExpression as $BasicEvaluatedExpression, DependencyOptions } from './interfaces';
 import { dependencyImports } from "./PreserveExportsPlugin";
+import { preserveModuleName } from "./PreserveModuleNamePlugin";
 const BasicEvaluatedExpression: $BasicEvaluatedExpression = require("webpack/lib/javascript/BasicEvaluatedExpression");
 const TAP_NAME = "Aurelia:Dependencies";
 
 class AureliaDependency extends IncludeDependency {
-  constructor(request: string, 
-              public range: [number, number], 
+  constructor(request: string,
+              public range: [number, number],
               options?: DependencyOptions) {
     super(request, options);
   }
@@ -24,8 +25,17 @@ class AureliaDependency extends IncludeDependency {
 }
 
 class Template {
+  constructor(private readonly compilation: webpack.Compilation) {}
+
   apply(dep: AureliaDependency, source: webpack.sources.ReplaceSource) {
-    source.replace(dep.range[0], dep.range[1] - 1, "'" + dep.request.replace(/^async(?:\?[^!]*)?!/, "") + "'");
+    // Get the module id, fallback to using the module request
+    let moduleId = dep.request;
+    const depModule = this.compilation.moduleGraph.getModule(dep);
+    if (depModule && typeof depModule[preserveModuleName] === "string") {
+      moduleId = depModule[preserveModuleName];
+    }
+
+    source.replace(dep.range[0], dep.range[1] - 1, "'" + moduleId.replace(/^async(?:\?[^!]*)?!/, "") + "'");
   };
 }
 
@@ -100,7 +110,7 @@ class ParserPlugin {
             let value = parser.evaluateExpression(prop.value as estree.Literal)!;
             switch (prop.key.name) {
               case "chunk":
-                if (value.isString()) 
+                if (value.isString())
                   options.chunk = value.string;
                 break;
               case "exports":
@@ -136,7 +146,7 @@ export class AureliaDependenciesPlugin {
       const normalModuleFactory = params.normalModuleFactory;
 
       compilation.dependencyFactories.set(AureliaDependency, normalModuleFactory);
-      compilation.dependencyTemplates.set(AureliaDependency, new Template());
+      compilation.dependencyTemplates.set(AureliaDependency, new Template(compilation));
 
       const handler = (parser: webpack.javascript.JavascriptParser) => {
         this.parserPlugin.apply(parser);

@@ -4,3 +4,23 @@ declare module "html-loader/lib/attributesParser" {
 
   export = parse;
 }
+
+declare namespace NodeModule {
+  interface ModuleResource {
+    [key: string]: Data;
+  }
+
+  interface ResourcesMap {
+    [key: string]: ModuleResource;
+  }
+
+  interface ResourceIdMap {
+    [key: string]: string;
+  }
+
+  interface Data {
+    path: string;
+    name: string;
+    relative: string;
+  }
+}
