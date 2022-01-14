@@ -1,6 +1,7 @@
 import { dependencyImports } from "./PreserveExportsPlugin";
 import { preserveModuleName } from "./PreserveModuleNamePlugin";
 import * as webpack from 'webpack';
+import { resolve } from 'path';
 import { DependencyOptions, ReferencedExport } from "./interfaces";
 
 export class IncludeDependency extends webpack.dependencies.ModuleDependency {
@@ -23,6 +24,14 @@ export class IncludeDependency extends webpack.dependencies.ModuleDependency {
     return [{ name: this.options?.exports ?? [], canMangle: false }]
   }
 
+  serialize() {
+    throw webpack.util.serialization.NOT_SERIALIZABLE;
+  }
+
+  deserialize() {
+    throw webpack.util.serialization.NOT_SERIALIZABLE;
+  }
+
   get [preserveModuleName]() {
     return true;
   }
@@ -34,3 +43,17 @@ export class IncludeDependency extends webpack.dependencies.ModuleDependency {
 
 export type NullDependencyTemplate = typeof webpack.dependencies.NullDependency.Template;
 export const Template: NullDependencyTemplate = webpack.dependencies.NullDependency.Template;
+
+webpack.util.serialization.register(
+  IncludeDependency,
+  resolve(__dirname, 'IncludeDependency'),
+  null as unknown as string,
+  {
+    serialize() {
+      throw webpack.util.serialization.NOT_SERIALIZABLE;
+    },
+    deserialize() {
+      throw webpack.util.serialization.NOT_SERIALIZABLE;
+    },
+  }
+);

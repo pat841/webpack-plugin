@@ -1,5 +1,6 @@
 import { IncludeDependency } from "./IncludeDependency";
 import * as estree from 'estree';
+import { resolve } from 'path';
 import * as webpack from 'webpack';
 
 import { BasicEvaluatedExpression as $BasicEvaluatedExpression, DependencyOptions } from './interfaces';
@@ -19,10 +20,32 @@ class AureliaDependency extends IncludeDependency {
     return `${super.type}/AureliaDependency`;
   }
 
+  serialize() {
+    throw webpack.util.serialization.NOT_SERIALIZABLE;
+  }
+
+  deserialize() {
+    throw webpack.util.serialization.NOT_SERIALIZABLE;
+  }
+
   get [dependencyImports]() {
     return webpack.Dependency.EXPORTS_OBJECT_REFERENCED as any;
   }
 }
+
+webpack.util.serialization.register(
+  AureliaDependency,
+  resolve(__dirname, 'AureliaDependency'),
+  null as unknown as string,
+  {
+    serialize() {
+      throw webpack.util.serialization.NOT_SERIALIZABLE;
+    },
+    deserialize() {
+      throw webpack.util.serialization.NOT_SERIALIZABLE;
+    },
+  }
+);
 
 class Template {
   constructor(private readonly compilation: webpack.Compilation) {}
