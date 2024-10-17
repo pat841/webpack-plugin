@@ -7,6 +7,8 @@ export declare class IncludeDependency extends webpack.dependencies.ModuleDepend
     constructor(request: string, options?: DependencyOptions);
     get type(): string;
     getReferencedExports(moduleGraph: webpack.ModuleGraph): (string[] | ReferencedExport)[];
+    serialize(): void;
+    deserialize(): void;
     get [preserveModuleName](): boolean;
     get [dependencyImports](): string[] | undefined;
 }

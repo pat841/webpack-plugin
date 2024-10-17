@@ -2,8 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AureliaDependenciesPlugin = void 0;
 const IncludeDependency_1 = require("./IncludeDependency");
+const path_1 = require("path");
 const webpack = require("webpack");
 const PreserveExportsPlugin_1 = require("./PreserveExportsPlugin");
+const PreserveModuleNamePlugin_1 = require("./PreserveModuleNamePlugin");
 const BasicEvaluatedExpression = require("webpack/lib/javascript/BasicEvaluatedExpression");
 const TAP_NAME = "Aurelia:Dependencies";
 class AureliaDependency extends IncludeDependency_1.IncludeDependency {
@@ -14,13 +16,36 @@ class AureliaDependency extends IncludeDependency_1.IncludeDependency {
     get type() {
         return `${super.type}/AureliaDependency`;
     }
+    serialize() {
+        throw webpack.util.serialization.NOT_SERIALIZABLE;
+    }
+    deserialize() {
+        throw webpack.util.serialization.NOT_SERIALIZABLE;
+    }
     get [PreserveExportsPlugin_1.dependencyImports]() {
         return webpack.Dependency.EXPORTS_OBJECT_REFERENCED;
     }
 }
+webpack.util.serialization.register(AureliaDependency, (0, path_1.resolve)(__dirname, 'AureliaDependency'), null, {
+    serialize() {
+        throw webpack.util.serialization.NOT_SERIALIZABLE;
+    },
+    deserialize() {
+        throw webpack.util.serialization.NOT_SERIALIZABLE;
+    },
+});
 class Template {
+    constructor(compilation) {
+        this.compilation = compilation;
+    }
     apply(dep, source) {
-        source.replace(dep.range[0], dep.range[1] - 1, "'" + dep.request.replace(/^async(?:\?[^!]*)?!/, "") + "'");
+        // Get the module id, fallback to using the module request
+        let moduleId = dep.request;
+        const depModule = this.compilation.moduleGraph.getModule(dep);
+        if (depModule && typeof depModule[PreserveModuleNamePlugin_1.preserveModuleName] === "string") {
+            moduleId = depModule[PreserveModuleNamePlugin_1.preserveModuleName];
+        }
+        source.replace(dep.range[0], dep.range[1] - 1, "'" + moduleId.replace(/^async(?:\?[^!]*)?!/, "") + "'");
     }
     ;
 }
@@ -118,7 +143,7 @@ class AureliaDependenciesPlugin {
         compiler.hooks.compilation.tap(TAP_NAME, (compilation, params) => {
             const normalModuleFactory = params.normalModuleFactory;
             compilation.dependencyFactories.set(AureliaDependency, normalModuleFactory);
-            compilation.dependencyTemplates.set(AureliaDependency, new Template());
+            compilation.dependencyTemplates.set(AureliaDependency, new Template(compilation));
             const handler = (parser) => {
                 this.parserPlugin.apply(parser);
             };
